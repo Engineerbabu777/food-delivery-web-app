@@ -24,4 +24,17 @@ export class UsersService {
   async login(loginDto:LoginDto){
 
   }
+
+  // fetch all users service!
+  async getUsers(){
+    // create and return users!
+    const users = [{
+      id:"1",
+      name:"John Doe",
+      email:"john@example",
+      password:"password"
+    }]
+
+    return users;
+  }
 }
