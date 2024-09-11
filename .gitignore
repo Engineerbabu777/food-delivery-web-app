@@ -10,6 +10,15 @@
 ./clients/node_modules
 ./server/node_modules
 
+
+
+/clients/node_modules
+/servers/node_modules
+
+
+./clients/node_modules
+./servers/node_modules
+
 # Logs
 logs
 *.log
