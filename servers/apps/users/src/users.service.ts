@@ -13,7 +13,6 @@ export class UsersService {
     private readonly emailService: EmailService,
   ){}
 
-
   // register user service
   async register(registerDto: RegisterDto, response: Response) {
     const { name, email, password, phone_number } = registerDto;
@@ -69,6 +68,7 @@ export class UsersService {
 
     return { activation_token, response };
   }
+
 
   async login(){
     return {user:"Test User Login"}
