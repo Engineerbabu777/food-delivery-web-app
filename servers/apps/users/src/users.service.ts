@@ -126,10 +126,75 @@ export class UsersService {
   }
 
 
-  async login(){
-    return {user:"Test User Login"}
+
+  // Login service
+  async Login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (user && (await this.comparePassword(password, user.password))) {
+      const tokenSender = new TokenSender(this.configService, this.jwtService);
+      return tokenSender.sendToken(user);
+    } else {
+      return {
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        error: {
+          message: 'Invalid email or password',
+        },
+      };
+    }
   }
 
+  
+  // compare with hashed password
+  async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPassword);
+  }
+
+  // generate forgot password link
+  async generateForgotPasswordLink(user: User) {
+    const forgotPasswordToken = this.jwtService.sign(
+      {
+        user,
+      },
+      {
+        secret: this.configService.get<string>('FORGOT_PASSWORD_SECRET'),
+        expiresIn: '5m',
+      },
+    );
+    return forgotPasswordToken;
+  }
+
+
+  
+  // get logged in user
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getLoggedInUser(req: any) {
+    const user = req.user;
+    const refreshToken = req.refreshtoken;
+    const accessToken = req.accesstoken;
+    return { user, refreshToken, accessToken };
+  }
+
+  // log out user
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async Logout(req: any) {
+    req.user = null;
+    req.refreshtoken = null;
+    req.accesstoken = null;
+    return { message: 'Logged out successfully!' };
+  }
+
+  
   async getAllUsers(){
     return [{user:"Name.."}]
   }
