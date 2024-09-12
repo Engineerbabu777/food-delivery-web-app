@@ -4,7 +4,7 @@ import {
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersResolver } from './user.resolver';
 // import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
@@ -12,7 +12,9 @@ import { EmailService } from './email/email.service';
 
 @Module({
   imports: [
-  
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       autoSchemaFile: {
@@ -24,7 +26,7 @@ import { EmailService } from './email/email.service';
   providers: [
     UsersService,
     ConfigService,
-    // JwtService
+    // JwtService,
     UsersResolver,
     EmailService,
   ],
