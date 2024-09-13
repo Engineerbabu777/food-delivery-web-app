@@ -176,6 +176,59 @@ export class UsersService {
 
 
   
+  // forgot password
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found with this email!');
+    }
+    const forgotPasswordToken = await this.generateForgotPasswordLink(user);
+
+    const resetPasswordUrl =
+      this.configService.get<string>('CLIENT_SIDE_URI') +
+      `/reset-password?verify=${forgotPasswordToken}`;
+
+    await this.emailService.sendMail({
+      email,
+      subject: 'Reset your Password!',
+      template: './forgot-password',
+      name: user.name,
+      activationCode: resetPasswordUrl,
+    });
+
+    return { message: `Your forgot password request succesful!` };
+  }
+
+  // reset password
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { password, activationToken } = resetPasswordDto;
+
+    const decoded = await this.jwtService.decode(activationToken);
+
+    if (!decoded || decoded?.exp * 1000 < Date.now()) {
+      throw new BadRequestException('Invalid token!');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.prisma.user.update({
+      where: {
+        id: decoded.user.id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return { user };
+  }
+  
   // get logged in user
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getLoggedInUser(req: any) {
