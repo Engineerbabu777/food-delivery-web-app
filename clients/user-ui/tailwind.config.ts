@@ -1,19 +1,24 @@
-import type { Config } from "tailwindcss";
+const { createGlobPatternsForDependencies } = require("@nx/react/tailwind");
+const { join } = require("path");
+const { nextui } = require("@nextui-org/react");
 
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    join(
+      __dirname,
+      "{src,pages,components,app}/**/*!(*.stories|*.spec).{ts,tsx,html}"
+    ),
+    "../../node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    ...createGlobPatternsForDependencies(__dirname),
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      fontFamily: {
+        Poppins: ["var(--font-Poppins)"],
+        Inter: ["var(--font-inter)"],
       },
     },
   },
-  plugins: [],
+  plugins: [nextui()],
 };
-export default config;
